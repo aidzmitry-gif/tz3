@@ -1,0 +1,35 @@
+-- ============================================================================
+-- 0003_cron.sql   (ОПЦИОНАЛЬНО — только для Supabase / Postgres с pg_cron)
+--
+-- Планировщик напоминаний. Есть два способа дёргать эндпойнт отправки
+-- /api/cron/send-reminders раз в минуту:
+--
+--   A) Vercel Cron      — настраивается в vercel.json (см. репозиторий), ничего
+--                          в БД делать не нужно. Это вариант по умолчанию.
+--
+--   B) pg_cron + pg_net — если хостинг это поддерживает (Supabase поддерживает),
+--                          планировщик живёт прямо в базе. Раскомментируйте блок
+--                          ниже и подставьте свой домен и CRON_SECRET.
+--
+-- ============================================================================
+
+-- create extension if not exists pg_cron;
+-- create extension if not exists pg_net;
+
+-- select cron.schedule(
+--   'send-booking-reminders',
+--   '* * * * *',                       -- каждую минуту
+--   $$
+--   select net.http_post(
+--     url     := 'https://ВАШ-ДОМЕН/api/cron/send-reminders',
+--     headers := jsonb_build_object(
+--       'Content-Type',  'application/json',
+--       'Authorization', 'Bearer ВАШ_CRON_SECRET'
+--     ),
+--     body    := '{}'::jsonb
+--   );
+--   $$
+-- );
+
+-- Снять задачу:
+-- select cron.unschedule('send-booking-reminders');
