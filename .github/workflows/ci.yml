@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          # Фиктивные значения: страницы force-dynamic и не обращаются
+          # к БД во время сборки, ключи нужны лишь чтобы прошла валидация env.
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: build-time-placeholder
+          BUSINESS_TIMEZONE: Europe/Moscow
+          CRON_SECRET: build-time-placeholder
